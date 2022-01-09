@@ -1,12 +1,16 @@
 import styled from "styled-components";
 import List from "./components/list";
 import GlobalStyles from "./globalStyles";
+import { StoreProvider } from "./context";
+import { reducer, initialState } from "./reducers";
 
 function App() {
   return (
     <Container>
-      <GlobalStyles />
-      <List />
+      <StoreProvider reducer={reducer} initialState={initialState}>
+        <GlobalStyles />
+        <List />
+      </StoreProvider>
     </Container>
   );
 }

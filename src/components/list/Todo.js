@@ -1,59 +1,40 @@
-import React, { useState, useEffect } from "react";
-import uuid from "react-uuid";
+import React, { useState } from "react";
+// import uuid from "react-uuid";
 import styled from "styled-components";
 import { AiFillEdit, AiFillDelete, AiOutlineClose } from "react-icons/ai";
 import Input from "../input";
+import { useStore, useDispatch } from "../../context";
 
+const initialValues = {
+  company: "",
+  job: "",
+  deadline: "",
+  postUrl: "",
+  salary: "",
+  location: "",
+};
 const Todo = ({ setShowModal }) => {
-  const [company, setCompany] = useState("");
-  const [job, setJob] = useState("");
-  const [lists, setLists] = useState([]);
-  const [editing, setEditing] = useState(null);
-  const [editingText, setEditingText] = useState("");
-
-  useEffect(() => {
-    const temp = localStorage.getItem("data");
-    const loadedTemp = JSON.parse(temp);
-    if (loadedTemp) {
-      setLists(loadedTemp);
-    }
-  }, []);
-
-  useEffect(() => {
-    const temp = JSON.stringify(lists);
-    localStorage.setItem("data", temp);
-  }, [lists]);
+  const [text, setText] = useState(initialValues);
+  // const { todos } = useStore();
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setText({
+      ...text,
+      [name]: value,
+    });
+  };
+  const dispatch = useDispatch();
 
   const addList = (e) => {
     e.preventDefault();
-    const newList = {
-      id: uuid(),
-      text: company,
-      completed: false,
-    };
-    if (company) {
-      setLists([...lists, newList]);
-      setCompany("");
+    if (text.company && text.job) {
+      dispatch({
+        type: "ADD_LIST",
+        text,
+      });
+      setText("");
+      setShowModal(false);
     }
-  };
-
-  const handleDelete = (id) => {
-    const data = lists.filter((list) => list.id !== id);
-    setLists(data);
-  };
-
-  const addEdit = (id) => {
-    const data = [...lists].map((list) => {
-      if (list.id === id) {
-        if (editingText) {
-          list.text = editingText;
-        }
-      }
-      return list;
-    });
-    setLists(data);
-    setEditing("");
-    setEditingText("");
   };
 
   return (
@@ -61,36 +42,62 @@ const Todo = ({ setShowModal }) => {
       <Close onClick={() => setShowModal(false)} />
       <form onSubmit={addList}>
         <div>
-          <Input name="Company" value={company} set={setCompany} />
+          <Input
+            label={"Company"}
+            name={"company"}
+            type={"text"}
+            value={text.company}
+            set={handleInputChange}
+          />
+        </div>
+        <div>
+          <Input
+            label={"Job Title"}
+            name={"job"}
+            value={text.job}
+            type={"text"}
+            set={handleInputChange}
+          />
+        </div>
+        <div>
+          <Input
+            label={"Deadline"}
+            name={"deadline"}
+            type={"date"}
+            value={text.deadline}
+            set={handleInputChange}
+          />
+        </div>
+        <div>
+          <Input
+            label={"Post Url"}
+            name={"postUrl"}
+            type={"url"}
+            value={text.postUrl}
+            set={handleInputChange}
+          />
+        </div>
+        <div>
+          <Input
+            label={"Salary"}
+            name={"salary"}
+            type={"number"}
+            value={text.salary}
+            set={handleInputChange}
+          />
+        </div>
+        <div>
+          <Input
+            label={"Location"}
+            name={"location"}
+            type={"text"}
+            value={text.location}
+            set={handleInputChange}
+          />
         </div>
 
         <button type="submit">Add</button>
       </form>
-
-      {lists.map((list) => (
-        <Card key={list.id}>
-          <div>
-            {editing === list.id ? (
-              <input
-                type="text"
-                value={editingText}
-                onChange={(e) => setEditingText(e.target.value)}
-              />
-            ) : (
-              list.text
-            )}
-          </div>
-          <Info>
-            {editing === list.id ? (
-              <button onClick={() => addEdit(list.id)}>Save</button>
-            ) : (
-              <AiFillEdit onClick={() => setEditing(list.id)} />
-            )}
-
-            <AiFillDelete onClick={() => handleDelete(list.id)} />
-          </Info>
-        </Card>
-      ))}
     </Container>
   );
 };
@@ -105,19 +112,6 @@ const Container = styled.div`
   padding: 20px;
   position: relative;
   overflow: auto;
-`;
-
-const Card = styled.div`
-  width: 100%;
-  border: 1px solid black;
-  border-radius: 10px;
-  margin: 10px 0;
-  padding: 5px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  background: steelblue;
 `;
 
 const Info = styled.div`
